@@ -67,6 +67,16 @@ button:disabled{opacity:.4;cursor:not-allowed}
 }
 
 .analysis{margin-top:28px}.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.statbox{background:#090909;border:1px solid #292929;border-radius:12px;padding:14px;text-align:center}.statbox b{display:block;font-size:24px;color:#ff6a00}.statbox span{font-size:11px;color:#999}.type-list{display:grid;gap:7px}.type-row{display:flex;justify-content:space-between;background:#090909;border:1px solid #252525;border-radius:8px;padding:8px 10px;font-size:13px}.mana-chart{display:flex;align-items:flex-end;gap:6px;height:150px;margin-top:15px;padding:10px 0;border-bottom:1px solid #333}.mana-col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}.mana-bar{width:100%;max-width:42px;background:#ff6a00;border-radius:5px 5px 0 0;min-height:2px}.mana-num,.analysis-note{font-size:11px;color:#999}.mana-count{font-size:11px;color:#fff}.color-pips{display:flex;gap:7px;justify-content:center;margin-top:10px;flex-wrap:wrap}.pip{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#222;border:1px solid #444;font-size:13px;font-weight:800}.pip.active{border-color:#ff6a00;box-shadow:0 0 12px #ff6a0055}@media(max-width:600px){.summary-grid{grid-template-columns:repeat(2,1fr)}}
+
+.accordion{margin-top:24px;border:1px solid #303030;border-radius:14px;background:#101010;overflow:hidden}
+.accordion-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;background:#151515;color:#fff;border:0;cursor:pointer;text-align:left;font:inherit}
+.accordion-toggle:hover{background:#1a1a1a}
+.accordion-toggle .chev{font-size:20px;color:#ff6a00;transition:transform .2s ease}
+.accordion.open .chev{transform:rotate(180deg)}
+.accordion-body{display:none;padding:0 16px 18px;border-top:1px solid #2b2b2b}
+.accordion.open .accordion-body{display:block}
+.accordion-title{font-weight:800}
+.accordion-sub{font-size:12px;color:#999;margin-top:3px}
 </style>
 </head>
 <body>
@@ -254,6 +264,7 @@ function escapeHtml(value){
 
 async function analyzeDeck(){
   const cards=parseDeck($('deck').value);
+  openDeckAccordion();
   $('results').innerHTML='';
   $('pdfPrint').innerHTML='';
   analyzedCards=[];
@@ -311,6 +322,8 @@ async function analyzeDeck(){
   }
 
   if(analyzedCards.length) renderDeckAnalysis();
+  $('deckAccordion').classList.remove('open');
+  $('deckAccordionToggle').setAttribute('aria-expanded','false');
   if(found>0){
     $('pdf').disabled=false;
     $('pdfmsg').textContent='La version imprimée utilise la meilleure image disponible (PNG haute résolution si disponible).';
@@ -323,6 +336,17 @@ $('aTotal').textContent=total;$('aLands').textContent=lands;$('aNonland').textCo
 const order=['W','U','B','R','G'], set=new Set();analyzedCards.forEach(c=>c.color_identity.forEach(x=>set.add(x)));const cols=order.filter(x=>set.has(x));$('aColors').textContent=cols.length?cols.join(''):'◈';$('colorPips').innerHTML=order.map(c=>'<div class="pip '+(set.has(c)?'active':'')+'">'+c+'</div>').join('');
 const types=['Creature','Artifact','Enchantment','Instant','Sorcery','Planeswalker','Battle','Land'];const counts={};types.forEach(t=>counts[t]=0);analyzedCards.forEach(c=>types.forEach(t=>{if(new RegExp('\\b'+t+'\\b','i').test(c.type_line))counts[t]+=c.qty}));$('typeList').innerHTML=types.filter(t=>counts[t]).map(t=>'<div class="type-row"><span>'+t+'</span><b>'+counts[t]+'</b></div>').join('');
 const b=Array(7).fill(0);analyzedCards.filter(c=>!isLand(c)).forEach(c=>b[Math.min(6,Math.floor(c.cmc))]+=c.qty);const max=Math.max(1,...b);$('manaChart').innerHTML=b.map((n,i)=>'<div class="mana-col"><span class="mana-count">'+n+'</span><div class="mana-bar" style="height:'+Math.max(2,Math.round(n/max*115))+'px"></div><span class="mana-num">'+(i===6?'6+':i)+'</span></div>').join('');$('analysisBox').style.display='block';
+}
+$('deckAccordionToggle').addEventListener('click',()=>{
+  const box=$('deckAccordion');
+  box.classList.toggle('open');
+  $('deckAccordionToggle').setAttribute('aria-expanded',box.classList.contains('open')?'true':'false');
+});
+
+function openDeckAccordion(){
+  const box=$('deckAccordion');
+  box.classList.add('open');
+  $('deckAccordionToggle').setAttribute('aria-expanded','true');
 }
 $('analyze').addEventListener('click',analyzeDeck);
 
