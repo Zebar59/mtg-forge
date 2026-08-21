@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MTG Forge — Proxies Magic en français</title>
+<style>
+:root{--bg:#070707;--panel:#111;--line:#292929;--orange:#ff6a00;--text:#f5f5f5;--muted:#999;--ok:#69d99a;--warn:#ffb45c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0,#321505 0,#0b0908 25%,#070707 55%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+header{height:70px;border-bottom:1px solid #222;display:flex;align-items:center;justify-content:space-between;padding:0 5%;background:#080808e8;position:sticky;top:0;z-index:5}
+.logo{font-size:24px;font-weight:900}.logo b{color:var(--orange)}main{max-width:1120px;margin:auto;padding:55px 20px 80px}
+.hero{text-align:center}.tag{color:var(--orange);font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}.hero h1{font-size:clamp(38px,7vw,68px);line-height:.98;margin:12px 0}.hero h1 span{color:var(--orange)}.hero p{max-width:680px;margin:0 auto 34px;color:var(--muted);font-size:17px;line-height:1.55}
+.box{background:linear-gradient(180deg,#151515,#0d0d0d);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 20px 60px #0009}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+h2{font-size:18px;margin:0 0 14px}textarea{width:100%;height:340px;background:#080808;color:#eee;border:1px solid #333;border-radius:12px;padding:15px;font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;outline:0}textarea:focus{border-color:var(--orange)}
+.actions{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}button{border:0;border-radius:10px;padding:13px 17px;font-weight:800;cursor:pointer}.primary{background:var(--orange);color:#160900}.secondary{background:#1d1d1d;color:#fff;border:1px solid #333}
+.note{font-size:12px;color:#777;margin-top:10px;line-height:1.4}.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.pill{border:1px solid #303030;background:#191919;border-radius:999px;padding:7px 10px;font-size:12px}.ok{color:var(--ok)}.warn{color:var(--warn)}
+.results{display:grid;gap:9px;max-height:510px;overflow:auto}.card{display:flex;gap:11px;align-items:center;background:#090909;border:1px solid #252525;border-radius:12px;padding:9px}.thumb{width:48px;height:67px;object-fit:cover;border-radius:5px;background:#1c1c1c}.name{font-weight:750}.meta{font-size:12px;color:#888;margin-top:4px}.status{margin-left:auto;font-size:12px;white-space:nowrap}.empty{text-align:center;color:#777;padding:90px 15px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}.feature{padding:17px;background:#101010;border:1px solid #242424;border-radius:13px;text-align:center;color:#aaa;font-size:13px}.feature strong{display:block;color:#fff;margin-bottom:5px}
+footer{text-align:center;color:#666;font-size:12px;margin-top:30px}
+@media(max-width:800px){.grid,.features{grid-template-columns:1fr}main{padding-top:38px}.hero p{font-size:15px}.box{padding:16px}textarea{height:250px}.results{max-height:none}}
+</style>
+</head>
+<body>
+<header><div class="logo">⚒ <b>MTG</b> FORGE</div><div style="color:#777;font-size:12px">V0.2</div></header>
+<main>
+<section class="hero">
+<div class="tag">L'atelier français du proxy</div>
+<h1>Prépare ton deck.<br><span>Imprime-le.</span></h1>
+<p>Colle ta decklist. MTG Forge reconnaît les cartes et cherche en priorité leurs impressions françaises.</p>
+</section>
+
+<section class="grid">
+<div class="box">
+<h2>📋 Ma decklist</h2>
+<textarea id="deck">Commander
+1 The Great Goblin
+
+Deck
+1 Sol Ring
+1 Lightning Bolt
+1 Kiki-Jiki, Mirror Breaker
+1 Krenko, Mob Boss
+1 Skullclamp
+2 Mountain
+2 Swamp</textarea>
+<div class="actions"><button class="primary" id="analyze">⚒ Analyser mon deck</button><button class="secondary" id="clear">Effacer</button></div>
+<div class="note">Format accepté : « 1 Nom de carte ». Commander / Deck sont facultatifs.</div>
+</div>
+
+<div class="box">
+<h2>🔎 Résultat</h2>
+<div id="stats" class="stats"></div>
+<div id="results"><div class="empty">Lance l'analyse pour commencer.</div></div>
+</div>
+</section>
+
+<section class="features">
+<div class="feature"><strong>🇫🇷 Versions françaises</strong>Priorité aux impressions FR</div>
+<div class="feature"><strong>🎟️ Tokens</strong>Détection automatique à venir</div>
+<div class="feature"><strong>🖨️ PDF</strong>Génération à venir</div>
+</section>
+<footer>MTG Forge — prototype • Recherche de cartes via Scryfall</footer>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function parse(text){
+ const map=new Map();
+ for(const raw of text.split(/\n/)){
+  const line=raw.trim();
+  if(!line||/^(commander|deck|sideboard|companion|maybeboard)$/i.test(line))continue;
+  const m=line.match(/^(\d+)\s*[x×]?\s+(.+)$/); if(!m)continue;
+  const name=m[2].replace(/\s+\[[A-Za-z0-9]+\]$/,'').trim(),k=name.toLowerCase();
+  if(map.has(k))map.get(k).qty+=+m[1];else map.set(k,{name,qty:+m[1]});
+ }
+ return [...map.values()];
+}
+async function getCard(name){
+ const q=encodeURIComponent('!"'+name.replaceAll('"','\\"')+'" lang:fr');
+ const r=await fetch('https://api.scryfall.com/cards/search?q='+q+'&unique=prints');
+ if(r.ok){const d=await r.json();if(d.data?.length)return d.data[0]}
+ const r2=await fetch('https://api.scryfall.com/cards/named?exact='+encodeURIComponent(name));
+ if(!r2.ok)throw Error('not found');return await r2.json();
+}
+async function analyze(){
+ const cards=parse($('deck').value);$('results').innerHTML='';$('stats').innerHTML='<span class="pill">Analyse…</span>';
+ let found=0,fr=0,missing=0,total=cards.reduce((a,c)=>a+c.qty,0);
+ for(const c of cards){
+  const row=document.createElement('div');row.className='card';
+  row.innerHTML='<div class="thumb"></div><div><div class="name">'+esc(c.qty+' × '+c.name)+'</div><div class="meta">Recherche…</div></div><div class="status">…</div>';$('results').append(row);
+  try{
+   const d=await getCard(c.name);found++;if(d.lang==='fr')fr++;
+   const img=d.image_uris?.small||d.card_faces?.[0]?.image_uris?.small;if(img)row.querySelector('.thumb').src=img;
+   row.querySelector('.meta').textContent=(d.set_name||'Édition inconnue')+' • '+(d.lang||'en').toUpperCase();
+   row.querySelector('.status').textContent=d.lang==='fr'?'✓ FR':'✓ Trouvée';
+   row.querySelector('.status').className='status '+(d.lang==='fr'?'ok':'warn');
+  }catch(e){missing++;row.querySelector('.meta').textContent='Carte non reconnue';row.querySelector('.status').textContent='À vérifier';row.querySelector('.status').className='status warn'}
+  $('stats').innerHTML='<span class="pill ok">✓ '+found+' reconnues</span><span class="pill '+(fr?'ok':'warn')+'">🇫🇷 '+fr+' FR</span><span class="pill '+(missing?'warn':'ok')+'">⚠ '+missing+' à vérifier</span><span class="pill">'+total+' exemplaires</span>';
+ }
+}
+$('analyze').onclick=analyze;
+$('clear').onclick=()=>{$('deck').value='';$('results').innerHTML='<div class="empty">Lance l’analyse pour commencer.</div>';$('stats').innerHTML=''};
+</script>
+</body>
+</html>
