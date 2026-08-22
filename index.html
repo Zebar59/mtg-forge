@@ -469,41 +469,38 @@ $('analyze').addEventListener('click',analyzeDeck);
 function buildPrintLayout(){
   const gap=Math.max(0,Math.min(3.5,Number($('gap').value)||0));
 
-  let cardsToPrint = [...printCards];
-
-  if ($('removeBasics').checked) {
-    cardsToPrint = cardsToPrint.filter(card => {
-      return !/Basic Land/i.test(card.type);
-    });
-  }
-
-  // A4 portrait = 210 mm wide. With 8.5 mm margins on each side,
-  // 193 mm remain for 3 cards and 2 gaps. Recalculate the card size
-  // so every gap value from 0 to 3.5 mm still fits on the page.
+  // A4 portrait : largeur utile de 193 mm
   const usableWidth=193;
   const cardW=(usableWidth-(2*gap))/3;
   const cardH=cardW*(88/63);
 
   const container=$('pdfPrint');
   container.innerHTML='';
+
   container.style.setProperty('--print-gap',gap+'mm');
   container.style.setProperty('--print-card-w',cardW.toFixed(3)+'mm');
   container.style.setProperty('--print-card-h',cardH.toFixed(3)+'mm');
 
-for(const card of cardsToPrint){
-  const src = card.image;
+  // Vérifie si l'utilisateur souhaite retirer les terrains de base
+  const removeBasics=$('removeBasics') && $('removeBasics').checked;
 
-  const pc=document.createElement('div');
-  pc.className='print-card';
+  // Cartes à imprimer
+  const cardsToPrint=removeBasics
+    ? printCards.filter(card=>!card.basic)
+    : printCards;
 
-  const img=document.createElement('img');
-  img.src=src;
-  img.alt='';
-  img.decoding='sync';
+  for(const card of cardsToPrint){
+    const pc=document.createElement('div');
+    pc.className='print-card';
 
-  pc.appendChild(img);
-  container.appendChild(pc);
-}
+    const img=document.createElement('img');
+    img.src=card.image;
+    img.alt=card.name;
+    img.loading='eager';
+
+    pc.appendChild(img);
+    container.appendChild(pc);
+  }
 }
 $('pdf').addEventListener('click',()=>{
   if(!$('pdf').disabled){
