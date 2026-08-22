@@ -41,7 +41,22 @@
 /* TON CSS ACTUEL CONTINUE ICI */
 :root{--bg:#070707;--panel:#111;--line:#292929;--orange:#ff6a00;--text:#f5f5f5;--muted:#999;--ok:#69d99a;--warn:#ffb45c}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at 80% 0,#321505,#070707 55%);color:var(--text);font-family:system-ui,sans-serif}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 80% 0,
+      var(--theme-color-1, #321505) 0%,
+      transparent 45%
+    ),
+    radial-gradient(circle at 15% 85%,
+      var(--theme-color-2, #140804) 0%,
+      transparent 40%
+    ),
+    #070707;
+  color:var(--text);
+  font-family:system-ui,sans-serif;
+  transition:background 1.2s ease;
+}
 header{padding:18px 5%;border-bottom:1px solid #292929;font-size:24px;font-weight:900}
 header span{color:var(--orange)}
 main{max-width:1100px;margin:auto;padding:45px 20px}
@@ -386,8 +401,40 @@ function escapeHtml(value){
   return value.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-async function analyzeDeck(){
+function applyCommanderTheme(colors=[]){
+  const root=document.documentElement;
+
+  const themes={
+    W:'#d8c58a',
+    U:'#1b5f9e',
+    B:'#5a2a75',
+    R:'#a82a12',
+    G:'#1d6b3a'
+  };
+
+  // Aucun commandant ou commandant incolore
+  if(!colors.length){
+    root.style.setProperty('--theme-color-1','#321505');
+    root.style.setProperty('--theme-color-2','#140804');
+    return;
+  }
+
+  const primary=themes[colors[0]] || '#321505';
+  const secondary=themes[colors[1]] || primary;
+
+  root.style.setProperty('--theme-color-1',primary+'88');
+  root.style.setProperty('--theme-color-2',secondary+'66');
+}
+  async function analyzeDeck(){
   const cards=parseDeck($('deck').value);
+    const rawDeck=$('deck').value;
+const commanderMatch=rawDeck.match(
+  /(?:^|\n)\s*(?:\[?COMMANDER\]?)\s*\n\s*\d+\s*[x×]?\s+(.+)/i
+);
+
+const commanderName=commanderMatch
+  ? normalizeCardName(commanderMatch[1])
+  : null;
   $('results').innerHTML='';
   $('pdfPrint').innerHTML='';
   analyzedCards=[];
@@ -411,6 +458,13 @@ async function analyzeDeck(){
 
     try{
       const card=await findCard(item.name);
+      if(
+  commanderName &&
+  normalizeCardName(item.name).toLowerCase() ===
+  commanderName.toLowerCase()
+){
+  applyCommanderTheme(card.color_identity || []);
+}
       found++;
       if(card.lang==='fr') fr++;
 
@@ -544,6 +598,8 @@ $('pdf').addEventListener('click', async ()=>{
 });
 
 $('clear').addEventListener('click',()=>{
+  applyCommanderTheme([]);
+  
   $('deck').value='';
   $('results').innerHTML='<div class="empty">Lance l’analyse pour commencer.</div>';
   $('pdfPrint').innerHTML=''; printCards=[]; analyzedCards=[]; $('analysisBox').style.display='none';
