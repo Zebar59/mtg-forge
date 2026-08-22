@@ -508,11 +508,29 @@ function buildPrintLayout(){
     container.appendChild(pc);
   }
 }
-$('pdf').addEventListener('click',()=>{
-  if(!$('pdf').disabled){
-    buildPrintLayout();
-    window.print();
-  }
+$('pdf').addEventListener('click', async ()=>{
+  if($('pdf').disabled) return;
+
+  buildPrintLayout();
+
+  const images=[
+    ...$('pdfPrint').querySelectorAll('img')
+  ];
+
+  await Promise.all(
+    images.map(img=>{
+      if(img.complete && img.naturalWidth>0){
+        return Promise.resolve();
+      }
+
+      return new Promise(resolve=>{
+        img.onload=resolve;
+        img.onerror=resolve;
+      });
+    })
+  );
+
+  window.print();
 });
 
 $('clear').addEventListener('click',()=>{
