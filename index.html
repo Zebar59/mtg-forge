@@ -432,11 +432,15 @@ async function analyzeDeck(){
           $('modalImage').src=high;
           $('modal').classList.add('show');
         });
-        for(let i=0;i<item.qty;i++){
+const isBasicLand =
+  /\bBasic Land\b/i.test(card.type_line) ||
+  /^(Plains|Island|Swamp|Mountain|Forest)$/i.test(card.name);
+
+for(let i=0;i<item.qty;i++){
   printCards.push({
     image: high,
     name: card.name,
-    type: card.type_line
+    basic: isBasicLand
   });
 }
       }
