@@ -488,7 +488,7 @@ function buildPrintLayout(){
   container.style.setProperty('--print-card-h',cardH.toFixed(3)+'mm');
 
   // Vérifie si l'utilisateur souhaite retirer les terrains de base
-  const removeBasics=$('removeBasics') && $('removeBasics').checked;
+  const removeBasics = $('excludeBasics') && $('excludeBasics').checked;
 
   // Cartes à imprimer
 const basicLandNames = [
