@@ -491,9 +491,19 @@ function buildPrintLayout(){
   const removeBasics=$('removeBasics') && $('removeBasics').checked;
 
   // Cartes à imprimer
-  const cardsToPrint=removeBasics
-    ? printCards.filter(card=>!card.basic)
-    : printCards;
+const basicLandNames = [
+  'Plains', 'Island', 'Swamp', 'Mountain', 'Forest',
+  'Plaine', 'Île', 'Ile', 'Marais', 'Montagne', 'Forêt', 'Foret'
+];
+
+const cardsToPrint = removeBasics
+  ? printCards.filter(card => {
+      const name = (card.name || '').trim();
+      return !basicLandNames.some(basic =>
+        name.toLowerCase() === basic.toLowerCase()
+      );
+    })
+  : printCards;
 
   for(const card of cardsToPrint){
     const pc=document.createElement('div');
