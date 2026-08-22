@@ -5,6 +5,40 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MTG Forge</title>
 <style><style>
+  .drop-zone{
+  border:2px dashed #555;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:14px;
+  text-align:center;
+  cursor:pointer;
+  color:#aaa;
+  transition:.2s ease;
+  background:rgba(255,255,255,.02);
+}
+
+.drop-zone:hover{
+  border-color:#ff7a00;
+  color:#fff;
+}
+
+.drop-zone.dragover{
+  border-color:#ff7a00;
+  background:rgba(255,122,0,.08);
+  box-shadow:0 0 20px rgba(255,122,0,.12);
+}
+
+.drop-message{
+  font-weight:600;
+}
+
+.drop-message span{
+  display:block;
+  font-size:12px;
+  font-weight:400;
+  color:#888;
+  margin-top:4px;
+}
 
 /* AJOUT POUR ALIGNER LES PANNEAUX */
 .top-layout {
@@ -213,6 +247,20 @@ button:disabled{opacity:.4;cursor:not-allowed}
 <div class="top-grid">
 <div class="box inputbox">
 <h2>📋 Ma decklist</h2>
+<div class="drop-zone" id="dropZone">
+  <div class="drop-message">
+    📥 Glissez-déposez votre decklist ici
+    <span>ou cliquez pour choisir un fichier</span>
+  </div>
+
+  <input
+    type="file"
+    id="deckFile"
+    accept=".txt,.csv,.dek"
+    hidden
+  >
+</div>
+
 <textarea id="deck">Commander
 1 The Great Goblin
 
@@ -224,10 +272,14 @@ Deck
 1 Skullclamp
 2 Mountain
 2 Swamp</textarea>
+
 <br>
+
 <button class="primary" id="analyze">⚒ Analyser mon deck</button>
 <button class="secondary" id="clear">Effacer</button>
-<div class="note">Format : 1 Nom de carte. Commander / Deck facultatifs.</div>
+
+<div class="note">
+  📁 Vous pouvez aussi glisser-déposer une decklist.
 </div>
 
 <section class="analysis box" id="analysisBox" style="display:none">
@@ -558,6 +610,53 @@ $('clear').addEventListener('click',()=>{
 $('closeModal').addEventListener('click',e=>{e.stopPropagation();$('modal').classList.remove('show')});
 $('modal').addEventListener('click',e=>{if(e.target===$('modal'))$('modal').classList.remove('show')});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')$('modal').classList.remove('show')});
+  const dropZone=$('dropZone');
+const deckFile=$('deckFile');
+
+dropZone.addEventListener('click',()=>{
+  deckFile.click();
+});
+
+dropZone.addEventListener('dragover',(e)=>{
+  e.preventDefault();
+  dropZone.classList.add('dragover');
+});
+
+dropZone.addEventListener('dragleave',()=>{
+  dropZone.classList.remove('dragover');
+});
+
+dropZone.addEventListener('drop',(e)=>{
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+
+  const file=e.dataTransfer.files[0];
+
+  if(file){
+    loadDeckFile(file);
+  }
+});
+
+deckFile.addEventListener('change',()=>{
+  const file=deckFile.files[0];
+
+  if(file){
+    loadDeckFile(file);
+  }
+});
+
+function loadDeckFile(file){
+  const reader=new FileReader();
+
+  reader.onload=(e)=>{
+    $('deck').value=e.target.result;
+
+    dropZone.querySelector('.drop-message').innerHTML=
+      '✓ <strong>'+file.name+'</strong><span>Decklist importée avec succès</span>';
+  };
+
+  reader.readAsText(file);
+}
 </script>
 </body>
 </html>
