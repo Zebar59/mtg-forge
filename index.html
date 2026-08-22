@@ -432,7 +432,13 @@ async function analyzeDeck(){
           $('modalImage').src=high;
           $('modal').classList.add('show');
         });
-        for(let i=0;i<item.qty;i++) printCards.push(high);
+        for(let i=0;i<item.qty;i++){
+  printCards.push({
+    image: high,
+    name: card.name,
+    type: card.type_line
+  });
+}
       }
     }catch(e){
       bad++;
@@ -463,6 +469,14 @@ $('analyze').addEventListener('click',analyzeDeck);
 function buildPrintLayout(){
   const gap=Math.max(0,Math.min(3.5,Number($('gap').value)||0));
 
+  let cardsToPrint = [...printCards];
+
+  if ($('removeBasics').checked) {
+    cardsToPrint = cardsToPrint.filter(card => {
+      return !/Basic Land/i.test(card.type);
+    });
+  }
+
   // A4 portrait = 210 mm wide. With 8.5 mm margins on each side,
   // 193 mm remain for 3 cards and 2 gaps. Recalculate the card size
   // so every gap value from 0 to 3.5 mm still fits on the page.
@@ -476,16 +490,20 @@ function buildPrintLayout(){
   container.style.setProperty('--print-card-w',cardW.toFixed(3)+'mm');
   container.style.setProperty('--print-card-h',cardH.toFixed(3)+'mm');
 
-  for(const src of printCards){
-    const pc=document.createElement('div');
-    pc.className='print-card';
-    const img=document.createElement('img');
-    img.src=src;
-    img.alt='';
-    img.decoding='sync';
-    pc.appendChild(img);
-    container.appendChild(pc);
-  }
+for(const card of cardsToPrint){
+  const src = card.image;
+
+  const pc=document.createElement('div');
+  pc.className='print-card';
+
+  const img=document.createElement('img');
+  img.src=src;
+  img.alt='';
+  img.decoding='sync';
+
+  pc.appendChild(img);
+  container.appendChild(pc);
+}
 }
 $('pdf').addEventListener('click',()=>{
   if(!$('pdf').disabled){
