@@ -98,17 +98,22 @@ button:disabled{opacity:.4;cursor:not-allowed}
   .grid{display:block}
   .box{border:0;padding:0;background:#fff}
   #results{display:none!important}
-  #pdfPrint{
+#pdfPrint{
     display:grid!important;
+    box-sizing:border-box;
     width:210mm;
-    min-height:297mm;
+    min-height:0;
+    margin:0;
     padding:8.5mm;
+
     grid-template-columns:repeat(3,var(--print-card-w,63mm));
     grid-auto-rows:var(--print-card-h,88mm);
+
     column-gap:var(--print-gap,2mm);
     row-gap:var(--print-gap,2mm);
+
     align-content:start;
-  }
+}
   .print-card{
     width:var(--print-card-w,63mm);
     height:var(--print-card-h,88mm);
