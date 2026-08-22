@@ -299,11 +299,10 @@ function parseDeck(text){
     // Remove bullets occasionally added by apps.
     line=line.replace(/^[•\-–—]\s*/,'');
 
-    const m=line.match(/^(\d+)\s*[x×]?\s+(.+?)\s*$/u);
-    if(!m) continue;
+const m=line.match(/^(\d+)\s*[x×]?\s+(.+?)\s*$/u);
 
-    const qty=Number(m[1]);
-    let name=m[2];
+const qty=m ? Number(m[1]) : 1;
+let name=m ? m[2] : line;
 
     // ManaBox / Moxfield / Archidekt collector information.
     // Examples: "Card Name (ABC) 123", "Card Name [ABC] 123"
