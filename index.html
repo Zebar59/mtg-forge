@@ -173,7 +173,26 @@ button:disabled{opacity:.4;cursor:not-allowed}
     grid-template-columns:1fr !important;
   }
 }
+/* Alignement vertical des deux panneaux du haut */
+.top-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: stretch;
+}
 
+.top-grid > .deck-box,
+.top-grid > .analysis {
+  margin-top: 0 !important;
+  align-self: stretch;
+}
+
+/* Même hauteur */
+.deck-box,
+.analysis {
+  box-sizing: border-box;
+  height: 100%;
+}
 </style>
 </head>
 <body>
