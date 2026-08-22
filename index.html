@@ -433,8 +433,10 @@ async function analyzeDeck(){
           $('modal').classList.add('show');
         });
 const isBasicLand =
-  /\bBasic Land\b/i.test(card.type_line) ||
-  /^(Plains|Island|Swamp|Mountain|Forest)$/i.test(card.name);
+  card.basic === true ||
+  /\bBasic\b/i.test(card.type_line || '') ||
+  /\bde base\b/i.test(card.type_line || '') ||
+  /^(Plains|Island|Swamp|Mountain|Forest|Plaine|Île|Ile|Marais|Montagne|Forêt|Foret)$/i.test(card.name);
 
 for(let i=0;i<item.qty;i++){
   printCards.push({
